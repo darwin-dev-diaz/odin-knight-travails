@@ -1,19 +1,14 @@
 const legalMoves = Array.from({ length: 64 }, () => []);
 
-const hash = (arr) => {
-  return arr[0] * 8 + arr[1];
-};
+const hash = (arr) => arr[0] * 8 + arr[1];
 
 const getLegalMoves = (coords) => {
   const returnArr = [];
-  returnArr.push([coords[0] + 1, coords[1] + 2]);
-  returnArr.push([coords[0] + 2, coords[1] + 1]);
-  returnArr.push([coords[0] + 2, coords[1] - 1]);
-  returnArr.push([coords[0] + 1, coords[1] - 2]);
-  returnArr.push([coords[0] - 1, coords[1] - 2]);
-  returnArr.push([coords[0] - 2, coords[1] - 1]);
-  returnArr.push([coords[0] - 2, coords[1] + 1]);
-  returnArr.push([coords[0] - 1, coords[1] + 2]);
+  const dX = [1, 2, 2, 1, -1, -2, -2, -1];
+  const dY = [2, 1, -1, -2, -2, -1, 1, 1];
+  for (let i = 0; i < 8; i++) {
+    returnArr.push([coords[0] + dX[i], coords[1] + dY[i]]);
+  }
   return returnArr.filter(
     (x) => x[0] > -1 && x[0] < 8 && x[1] > -1 && x[1] < 8
   );
@@ -27,13 +22,10 @@ for (let i = 0; i < 8; i++) {
 }
 
 const knightMoves = (startCoords, goalCoords, moveCount = 0) => {
-  // base case: the move count is greater than 6
   if (moveCount > 6) return false;
-  // base case: the knight is on goalCoords
-  else if (JSON.stringify(startCoords) === JSON.stringify(goalCoords)) {
+  else if (JSON.stringify(startCoords) === JSON.stringify(goalCoords))
     return [startCoords];
-  }
-  // all possible moves
+
   const previousDistance = [
     Math.abs(startCoords[0] - goalCoords[0]),
     Math.abs(startCoords[1] - goalCoords[1]),
@@ -50,46 +42,16 @@ const knightMoves = (startCoords, goalCoords, moveCount = 0) => {
     );
   });
 
-  const moveChainList = closerMoves.map((move) => {
-    const moveChain = [startCoords].concat(
-      knightMoves(move, goalCoords, moveCount + 1)
-    );
-    return moveChain;
-  });
-  const legalChains = moveChainList.filter((chain) => chain[chain.length - 1]);
+  const legalChains = closerMoves
+    .map((move) => {
+      return [startCoords].concat(knightMoves(move, goalCoords, moveCount + 1));
+    })
+    .filter((chain) => chain[chain.length - 1]);
+
   if (!legalChains.length) return false;
 
-  const shortestPath = legalChains.reduce((prev, next) =>
+  // returns shortest path to goal
+  return legalChains.reduce((prev, next) =>
     prev.length > next.length ? next : prev
   );
-  return shortestPath;
 };
-
-console.log(knightMoves([0, 0], [7, 7]));
-console.log();
-console.log(knightMoves([0, 0], [2, 1])); // 1 move
-console.log();
-console.log(knightMoves([0, 0], [1, 2])); // 1 move
-console.log();
-console.log(knightMoves([0, 0], [3, 3])); // 2 moves
-console.log();
-console.log(knightMoves([4, 4], [4, 4])); // 0 moves
-console.log();
-console.log(knightMoves([0, 0], [7, 7])); // 6 moves
-console.log();
-console.log(knightMoves([7, 0], [0, 7])); // 5 moves
-console.log();
-console.log(knightMoves([0, 0], [6, 2])); // 4 moves
-console.log();
-console.log(knightMoves([7, 7], [5, 5])); // 4 moves
-console.log();
-console.log(knightMoves([2, 1], [0, 0])); // 1 move
-console.log();
-console.log(knightMoves([2, 1], [4, 2])); // 1 move
-console.log();
-console.log(knightMoves([3, 3], [4, 5])); // 1 move
-console.log();
-console.log(knightMoves([6, 6], [7, 4])); // 1 move
-console.log();
-console.log(knightMoves([1, 0], [2, 2])); // 2 moves
-console.log();
